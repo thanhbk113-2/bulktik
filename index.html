@@ -412,6 +412,46 @@
         margin-top: 10px;
         margin-left: 6px;
       }
+      .note-item {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        border: 1px solid #dadce0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 10px;
+        background: #f8f9fa;
+      }
+      .note-item .txt {
+        flex: 1;
+        white-space: pre-wrap; /* giữ nguyên xuống dòng */
+        word-break: break-all;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .note-item .acts {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .note-item .acts button {
+        margin: 0 !important;
+      }
+      .note-del {
+        padding: 6px 12px;
+        border: 1px solid #dadce0;
+        border-radius: 999px;
+        background: #fff;
+        color: #d93025;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .note-del:hover {
+        background: #fce8e6;
+        border-color: #d93025;
+      }
       /* Tablet */
       @media (max-width: 760px) {
         .grid {
@@ -626,6 +666,19 @@
           Tự lưu lại cho lần sau. Sửa ở đây thì nội dung các video chưa đăng
           (chưa sửa tay) cũng được cập nhật theo.
         </div>
+      </div>
+      <div class="fb-set">
+        <b style="font-size: 16px; color: #1877f2">📌 Văn bản / link lưu sẵn</b>
+        <textarea
+          id="noteInput"
+          class="cap"
+          style="height: 80px"
+          placeholder="Ví dụ: https://s.shopee.vn/9V1vTKh6eu (có thể xuống dòng)"
+        ></textarea>
+        <div class="row" style="margin-top: 10px">
+          <button class="btn-sm" id="noteSave" type="button">Lưu</button>
+        </div>
+        <div id="noteList"></div>
       </div>
 
       <textarea
@@ -1257,6 +1310,75 @@
           $('fbAll').textContent = '📘 Đăng / lên lịch tất cả lên Facebook';
         }
       };
+      // ===== Văn bản / link lưu sẵn =====
+      const NOTES_KEY = 'savedNotes';
+      const loadNotes = () => {
+        try {
+          return JSON.parse(localStorage.getItem(NOTES_KEY)) || [];
+        } catch (e) {
+          return [];
+        }
+      };
+      const storeNotes = (arr) =>
+        localStorage.setItem(NOTES_KEY, JSON.stringify(arr));
+
+      function renderNotes() {
+        const list = $('noteList');
+        list.innerHTML = '';
+        loadNotes().forEach((text, i) => {
+          const item = document.createElement('div');
+          item.className = 'note-item';
+
+          const txt = document.createElement('div');
+          txt.className = 'txt';
+          txt.textContent = text;
+
+          const acts = document.createElement('div');
+          acts.className = 'acts';
+
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'copy';
+          copyBtn.textContent = '📋 Copy';
+          copyBtn.onclick = async () => {
+            const ok = await copyText(text);
+            copyBtn.textContent = ok ? '✅ Đã copy' : '❌ Không copy được';
+            copyBtn.classList.toggle('ok', ok);
+            clearTimeout(copyBtn._t);
+            copyBtn._t = setTimeout(() => {
+              copyBtn.textContent = '📋 Copy';
+              copyBtn.classList.remove('ok');
+            }, 1500);
+          };
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'note-del';
+          delBtn.textContent = '🗑 Xoá';
+          delBtn.onclick = () => {
+            const arr = loadNotes();
+            arr.splice(i, 1);
+            storeNotes(arr);
+            renderNotes();
+          };
+
+          acts.append(copyBtn, delBtn);
+          item.append(txt, acts);
+          list.appendChild(item);
+        });
+      }
+
+      $('noteSave').onclick = () => {
+        const v = $('noteInput').value.trim();
+        if (!v) return;
+        const arr = loadNotes();
+        arr.push(v);
+        storeNotes(arr);
+        $('noteInput').value = '';
+        renderNotes();
+      };
+
+      renderNotes();
     </script>
   </body>
 </html>
