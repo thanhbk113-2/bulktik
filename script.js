@@ -41,6 +41,44 @@ $('clear').onclick = () => {
   updateCounter();
 };
 
+// Hiện thông báo ngắn trên chính nút, rồi trả lại chữ cũ
+function flashLabel(el, text, ms = 1500) {
+  if (!el._label) el._label = el.textContent;
+  el.textContent = text;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => (el.textContent = el._label), ms);
+}
+
+// Dán đoạn văn bản vừa copy vào ô link
+$('pasteClip').onclick = async () => {
+  const btn = $('pasteClip');
+  try {
+    const text = (await navigator.clipboard.readText()).trim();
+    if (!text) return flashLabel(btn, '⚠ Clipboard trống');
+    const ta = $('links');
+    ta.value = ta.value.trim() ? ta.value.trimEnd() + '\n' + text : text;
+    autoBreak();
+    updateCounter();
+    flashLabel(btn, '✅ Đã dán');
+  } catch (e) {
+    // Trình duyệt chặn quyền đọc clipboard (hoặc trang không chạy qua https)
+    flashLabel(btn, '❌ Bị chặn, hãy dán thủ công', 2500);
+    $('links').focus();
+  }
+};
+
+// Copy tất cả link đang có trong ô
+$('copyLinks').onclick = async () => {
+  const btn = $('copyLinks');
+  const links = parseLinks();
+  if (!links.length) return flashLabel(btn, '⚠ Chưa có link');
+  const ok = await copyText(links.join('\n'));
+  flashLabel(
+    btn,
+    ok ? `✅ Đã copy ${links.length} link` : '❌ Không copy được'
+  );
+};
+
 const abs = (u) =>
   !u ? '' : u.startsWith('/') ? 'https://www.tikwm.com' + u : u;
 

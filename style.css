@@ -579,3 +579,9 @@ textarea:focus {
   padding: 8px 10px;
   font-size: 14px;
 }
+.meta-acts {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
