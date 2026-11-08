@@ -412,6 +412,63 @@
         margin-top: 10px;
         margin-left: 6px;
       }
+      #noteFab {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        width: 56px;
+        height: 56px;
+        border: 0;
+        border-radius: 50%;
+        background: #1877f2;
+        color: #fff;
+        font-size: 26px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+      }
+      #noteFab:hover {
+        background: #166fe5;
+      }
+      #notePanel {
+        display: none;
+        position: fixed;
+        right: 18px;
+        bottom: 86px;
+        width: 360px;
+        max-width: calc(100vw - 36px);
+        max-height: 70vh;
+        background: #fff;
+        border: 1px solid #dadce0;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
+        z-index: 1000;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #notePanel.open {
+        display: flex;
+      }
+      .np-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #e8f0fe;
+        color: #1877f2;
+        font-size: 15px;
+      }
+      .np-head button {
+        border: 0;
+        background: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: #5f6368;
+      }
+      .np-body {
+        padding: 12px 16px 16px;
+        overflow-y: auto; /* danh sách dài thì cuộn trong bảng */
+      }
       .note-item {
         display: flex;
         gap: 10px;
@@ -424,13 +481,14 @@
       }
       .note-item .txt {
         flex: 1;
-        white-space: pre-wrap; /* giữ nguyên xuống dòng */
+        white-space: pre-wrap;
         word-break: break-all;
-        font-size: 15px;
+        font-size: 14px;
         line-height: 1.5;
       }
       .note-item .acts {
         display: flex;
+        flex-direction: column;
         gap: 6px;
         flex-shrink: 0;
       }
@@ -667,18 +725,27 @@
           (chưa sửa tay) cũng được cập nhật theo.
         </div>
       </div>
-      <div class="fb-set">
-        <b style="font-size: 16px; color: #1877f2">📌 Văn bản / link lưu sẵn</b>
-        <textarea
-          id="noteInput"
-          class="cap"
-          style="height: 80px"
-          placeholder="Ví dụ: https://s.shopee.vn/9V1vTKh6eu (có thể xuống dòng)"
-        ></textarea>
-        <div class="row" style="margin-top: 10px">
-          <button class="btn-sm" id="noteSave" type="button">Lưu</button>
+      <button id="noteFab" type="button" title="Văn bản / link lưu sẵn">
+        📌
+      </button>
+
+      <div id="notePanel">
+        <div class="np-head">
+          <b>📌 Văn bản / link lưu sẵn</b>
+          <button id="noteClose" type="button" aria-label="Đóng">✕</button>
         </div>
-        <div id="noteList"></div>
+        <div class="np-body">
+          <textarea
+            id="noteInput"
+            class="cap"
+            style="height: 70px; margin-top: 0"
+            placeholder="Ví dụ: https://s.shopee.vn/9V1vTKh6eu (có thể xuống dòng)"
+          ></textarea>
+          <div class="row" style="margin-top: 8px">
+            <button class="btn-sm" id="noteSave" type="button">Lưu</button>
+          </div>
+          <div id="noteList"></div>
+        </div>
       </div>
 
       <textarea
@@ -1379,6 +1446,16 @@
       };
 
       renderNotes();
+      // Bật/tắt bảng nổi
+      const togglePanel = (force) => {
+        const p = $('notePanel');
+        const open =
+          typeof force === 'boolean' ? force : !p.classList.contains('open');
+        p.classList.toggle('open', open);
+        $('noteFab').textContent = open ? '✕' : '📌';
+      };
+      $('noteFab').onclick = () => togglePanel();
+      $('noteClose').onclick = () => togglePanel(false);
     </script>
   </body>
 </html>
